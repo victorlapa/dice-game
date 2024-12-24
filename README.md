@@ -1,5 +1,5 @@
 ## Dice Game
 
-This project is a sandbox made to try out using Context and managing global states in an attempt to make a somewhat playable game showing how hard it is to win consistent money by gambling.
+This project is a sandbox made to try out using Context and managing global states while also making an UI that is able to simulate an old a retro feeling inspired by Balatro into a somewhat playable game.
 
 Plan on adding achievements and more gamifying features in the future.
