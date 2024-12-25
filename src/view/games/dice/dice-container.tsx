@@ -3,18 +3,25 @@ import { Button } from '../../common/Button';
 import { Dice } from './dice';
 import { DiceContext } from './dice-context-provider';
 import { getLimitedNumber } from '../../../utils/getLimitedNumber';
+import { GameContext } from '../../../context/game-context-provider';
 
 const DiceContainer = () => {
-  const [targetSum, setTargetSum] = useState(0);
+  const [targetSum, setTargetSum] = useState(6);
 
   const [isRolling, setIsRolling] = useState(false);
 
   const dice = useContext(DiceContext);
+  const game = useContext(GameContext);
+
   const diceRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const intervalRef = useRef<any>(null);
   const timeoutRef = useRef<any>(null);
 
   const rollDice = () => {
+    if (!dice || !game) return;
+
+    game.incrementGold(-1);
+
     setIsRolling(true);
 
     const timeoutMs = getLimitedNumber(1000, 5000);
@@ -36,18 +43,28 @@ const DiceContainer = () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
-        dice?.setDiceValues(
-          diceRefs.current.map((ref) => parseInt(ref?.textContent || '0', 10)),
-        );
       }
 
-      setIsRolling(false);
-    }, timeoutMs);
-  };
+      dice.setDiceValues([
+        parseInt(diceRefs.current[0]!.textContent!),
+        parseInt(diceRefs.current[1]!.textContent!),
+      ]);
 
-  const evaluateDice = () => {
-    const sum = dice?.diceValues.reduce((acc, value) => acc + value, 0) || 0;
-    return sum === targetSum;
+      setIsRolling(false);
+
+      if (
+        targetSum ===
+        parseInt(diceRefs.current[0]?.textContent!) +
+          parseInt(diceRefs.current[1]?.textContent!)
+      ) {
+        game.incrementGold(10);
+      } else {
+        console.log(
+          parseInt(diceRefs.current[0]?.textContent!) +
+            parseInt(diceRefs.current[1]?.textContent!),
+        );
+      }
+    }, timeoutMs);
   };
 
   useEffect(() => {
@@ -62,11 +79,14 @@ const DiceContainer = () => {
   }, []);
 
   if (!dice?.diceValues) {
-    return <span className="text-center font-space">Loading...</span>;
+    return <span className="text-center ">Loading...</span>;
   }
 
   return (
     <div className="w-full bg-white p-6 flex flex-col gap-5 items-center justify-center">
+      <button className="text-black" onClick={() => game!.incrementGold(1)}>
+        TEST
+      </button>
       <div className="flex items-center gap-2">
         {dice.diceValues.map((diceValues, index) => (
           <Dice
@@ -79,11 +99,13 @@ const DiceContainer = () => {
 
       <div className="flex flex-col items-center gap-1">
         <input
-          min={0}
+          className="disabled:cursor-not-allowed disabled:bg-gray-200"
+          min={2}
           max={12}
           type="range"
           value={targetSum}
           onChange={(e) => setTargetSum(parseInt(e.target.value))}
+          disabled={isRolling}
         />
 
         <p className="text-black">Target: {targetSum}</p>
