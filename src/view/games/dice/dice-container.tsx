@@ -84,9 +84,6 @@ const DiceContainer = () => {
 
   return (
     <div className="w-full bg-white p-6 flex flex-col gap-5 items-center justify-center">
-      <button className="text-black" onClick={() => game!.incrementGold(1)}>
-        TEST
-      </button>
       <div className="flex items-center gap-2">
         {dice.diceValues.map((diceValues, index) => (
           <Dice
